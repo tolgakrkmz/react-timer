@@ -49,7 +49,6 @@ class Timer extends Component {
                 <button onClick={this.startAction}>Start</button>
                 <button onClick={this.stopAction}>Stop</button>
                 <AddTimeToList time={convertedTime} />
-
             </div>
         );
     }
