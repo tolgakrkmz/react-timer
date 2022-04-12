@@ -1,44 +1,33 @@
 import React, { Component } from 'react'
 
 class AddTimeToList extends Component {
-    constructor(props) {
-        super(props);
+    state = {
+        list: [],
+    };
 
-        this.state = {
-            id: 1,
-            li: [],
-        };
-
-        this.handleOnClick = this.handleOnClick.bind(this);
-    }
-
-    handleOnClick(e) {
+    handleSaveClick = (e) => {
         e.preventDefault();
 
-        const newListItem = [this.props.time];
-
         this.setState({
-            li: [...this.state.li, newListItem],
+            list: [...this.state.list, this.props.time],
         });
-    }
+    };
 
     render() {
-        const { li } = this.state;
+        const { list } = this.state;
 
         return (
-            <div>
-                <button onClick={this.handleOnClick}>Save</button>
+            <>
+                <button onClick={this.handleSaveClick}>Save</button>
 
                 <ul>
-                    {
-                        li.map(function (data, index) {
-                            return (
-                                <li key={index}>{data}</li>
-                            )
-                        })
-                    }
+                    {list.map(function (data, index) {
+                        return (
+                            <li key={index}>{data}</li>
+                        )
+                    })}
                 </ul>
-            </div>
+            </>
         )
     }
 }
