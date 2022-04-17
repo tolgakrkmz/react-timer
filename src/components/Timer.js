@@ -13,7 +13,7 @@ class Timer extends Component {
         const newIntervalId = setInterval(() => {
             // Make Counter
             this.setState({
-                count: this.state.seconds + 1,
+                seconds: this.state.seconds + 1,
             });
         }, 1000);
 
@@ -28,7 +28,7 @@ class Timer extends Component {
             clearInterval(this.state.intervalId);
             this.setState({
                 intervalId: 0,
-                count: 1,
+                seconds: 1,
             });
         }
 
@@ -38,7 +38,7 @@ class Timer extends Component {
         if (this.state.intervalId) {
             clearInterval(this.state.intervalId);
             this.setState({
-                count: this.state.seconds,
+                seconds: this.state.seconds,
             })
         }
     }
@@ -58,6 +58,7 @@ class Timer extends Component {
 
         this.setState({
             list: [...this.state.list, listItem],
+            title: '',
         });
     };
 
