@@ -1,18 +1,19 @@
 import React, { Component } from 'react'
 import { formatHours } from '../utils/format';
-import AddTimeToList from './AddTimeToList';
 
 class Timer extends Component {
     state = {
-        count: 1,
+        seconds: 1,
         intervalId: 0,
+        list: [],
+        title: ''
     };
 
     startAction = () => {
         const newIntervalId = setInterval(() => {
             // Make Counter
             this.setState({
-                count: this.state.count + 1,
+                count: this.state.seconds + 1,
             });
         }, 1000);
 
@@ -33,13 +34,56 @@ class Timer extends Component {
 
     }
 
+    pauseAction = () => {
+        if (this.state.intervalId) {
+            clearInterval(this.state.intervalId);
+            this.setState({
+                count: this.state.seconds,
+            })
+        }
+    }
+
+    inputChangeHandler = ({ target: { value } }) => this.setState({
+        title: value,
+    })
+
+
+    handleSaveClick = (e) => {
+        e.preventDefault();
+
+        const listItem = {
+            title: this.state.title,
+            time: this.state.seconds,
+        }
+
+        this.setState({
+            list: [...this.state.list, listItem],
+        });
+    };
+
     render() {
+        const list = this.state.list;
         return (
             <>
-                <div>{formatHours(this.state.count)}</div>
+                <div>{formatHours(this.state.seconds)}</div>
+
+                <div>
+                    <form>
+                        <label htmlFor='input-for-title'>Title</label>
+                        <input type={'text'} value={this.state.title} onChange={this.inputChangeHandler}></input>
+                    </form>
+                </div>
+
                 <button onClick={this.startAction}>Start</button>
                 <button onClick={this.stopAction}>Stop</button>
-                <AddTimeToList time={formatHours(this.state.count)} />
+                <button onClick={this.pauseAction}>Pause</button>
+                <button onClick={this.handleSaveClick}>Save</button>
+
+                <ul>
+                    {
+                        list.map((listItem, key) => <li {...{ key }}>{listItem.title} - {formatHours(listItem.time)}</li>)
+                    }
+                </ul>
             </>
         );
     }
