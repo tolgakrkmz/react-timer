@@ -5,19 +5,18 @@ class Timer extends Component {
     state = {
         seconds: 1,
         intervalId: 0,
+        listId: 0,
         list: [],
         title: ''
     };
 
     startAction = () => {
         const newIntervalId = setInterval(() => {
-            // Make Counter
             this.setState({
                 seconds: this.state.seconds + 1,
             });
         }, 1000);
 
-        // Replace old IntervalID with new.
         this.setState({
             intervalId: newIntervalId,
         });
@@ -47,11 +46,11 @@ class Timer extends Component {
         title: value,
     })
 
-
     handleSaveClick = (e) => {
         e.preventDefault();
 
         const listItem = {
+            id: this.state.listId,
             title: this.state.title,
             time: this.state.seconds,
         }
@@ -59,8 +58,17 @@ class Timer extends Component {
         this.setState({
             list: [...this.state.list, listItem],
             title: '',
+            listId: this.state.listId + 1,
         });
     };
+
+    removeList = (id) => {
+        const newList = this.state.list.filter((listItem) => listItem.id !== id);
+
+        this.setState({
+            list: newList,
+        })
+    }
 
     render() {
         const list = this.state.list;
@@ -82,7 +90,11 @@ class Timer extends Component {
 
                 <ul>
                     {
-                        list.map((listItem, key) => <li {...{ key }}>{listItem.title} - {formatHours(listItem.time)}</li>)
+                        list.map((listItem, index) =>
+                            <li key={index}>
+                                {listItem.title} - {formatHours(listItem.time)}
+                                <button type="button" onClick={() => this.removeList(listItem.id)}>Remove</button>
+                            </li>)
                     }
                 </ul>
             </>
