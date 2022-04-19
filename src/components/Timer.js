@@ -7,7 +7,7 @@ class Timer extends Component {
         intervalId: 0,
         listId: 0,
         list: [],
-        title: ''
+        title: '',
     };
 
     startAction = () => {
@@ -53,6 +53,7 @@ class Timer extends Component {
             id: this.state.listId,
             title: this.state.title,
             time: this.state.seconds,
+            isEditMode: false,
         }
 
         this.setState({
@@ -63,17 +64,60 @@ class Timer extends Component {
     };
 
     removeList = (id) => {
-        const newList = this.state.list.filter((listItem) => listItem.id !== id);
+        return () => {
+            const newList = this.state.list.filter((listItem) => listItem.id !== id);
 
-        this.setState({
-            list: newList,
-        })
+            this.setState({
+                list: newList,
+            })
+        };
+    }
+
+    handleToggleEdit = (id) => {
+        return () => {
+            const currentItem = this.state.list.find(listItem => listItem.id === id);
+            let list = [...this.state.list];
+            currentItem.isEditMode = true;
+            list[currentItem] = currentItem;
+
+            this.setState({
+                list: list,
+            })
+        }
+    }
+
+    handleOnchage = (id) => {
+        return (e) => {
+            const currentItem = this.state.list.find(listItem => listItem.id === id);
+            let list = [...this.state.list];
+            currentItem.title = e.target.value;
+            list[currentItem] = currentItem;
+
+            this.setState({
+                list: list,
+            })
+
+        }
+    }
+
+    handleTitleSaveButton = (id) => {
+        return () => {
+            const currentItem = this.state.list.find(listItem => listItem.id === id);
+            let list = [...this.state.list];
+            currentItem.isEditMode = false;
+            list[currentItem] = currentItem;
+
+            this.setState({
+                list: list,
+            })
+        }
     }
 
     render() {
         const list = this.state.list;
         return (
             <>
+
                 <div>{formatHours(this.state.seconds)}</div>
 
                 <div>
@@ -92,8 +136,25 @@ class Timer extends Component {
                     {
                         list.map((listItem, index) =>
                             <li key={index}>
-                                {listItem.title} - {formatHours(listItem.time)}
-                                <button type="button" onClick={() => this.removeList(listItem.id)}>Remove</button>
+                                {
+                                    listItem.isEditMode ? (
+                                        <input
+                                            type='text'
+                                            defaultValue={listItem.title}
+                                            onChange={this.handleOnchage(listItem.id)}
+                                        />
+                                    )
+                                        : listItem.title}
+                                        {
+                                            listItem.title.length > 0 && ' - '
+                                        }
+                                    {formatHours(listItem.time)}
+                                {
+                                    listItem.isEditMode ? <button type='submit' onClick={this.handleTitleSaveButton(listItem.id)}>Save</button>
+                                        : <button type="button" onClick={this.handleToggleEdit(listItem.id)}>Edit</button>
+                                }
+                                <button type="button" onClick={this.removeList(listItem.id)}>Remove</button>
+
                             </li>)
                     }
                 </ul>
