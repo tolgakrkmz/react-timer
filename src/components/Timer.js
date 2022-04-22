@@ -8,6 +8,7 @@ class Timer extends Component {
         listId: 0,
         list: [],
         title: '',
+        description : ''
     };
 
     startAction = () => {
@@ -46,7 +47,7 @@ class Timer extends Component {
         title: value,
     })
 
-    handleSaveClick = (e) => {
+    saveButton = (e) => {
         e.preventDefault();
 
         const listItem = {
@@ -54,16 +55,19 @@ class Timer extends Component {
             title: this.state.title,
             time: this.state.seconds,
             isEditMode: false,
+            isDetailsShown: false,
+            description: this.state.description,
         }
 
         this.setState({
             list: [...this.state.list, listItem],
             title: '',
+            description: '',
             listId: this.state.listId + 1,
         });
     };
 
-    removeList = (id) => {
+    removeItemFromList = (id) => {
         return () => {
             const newList = this.state.list.filter((listItem) => listItem.id !== id);
 
@@ -73,12 +77,16 @@ class Timer extends Component {
         };
     }
 
-    handleToggleEdit = (id) => {
+    editButton = (id) => {
         return () => {
             const currentItem = this.state.list.find(listItem => listItem.id === id);
+            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
             let list = [...this.state.list];
             currentItem.isEditMode = true;
-            list[currentItem] = currentItem;
+            let newItem = {
+                ...currentItem
+            }
+            list[currentItemIdx] = newItem;
 
             this.setState({
                 list: list,
@@ -86,12 +94,16 @@ class Timer extends Component {
         }
     }
 
-    handleOnchage = (id) => {
+    changeTitleInEditState = (id) => {
         return (e) => {
             const currentItem = this.state.list.find(listItem => listItem.id === id);
+            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
             let list = [...this.state.list];
             currentItem.title = e.target.value;
-            list[currentItem] = currentItem;
+            let newItem = {
+                ...currentItem
+            }
+            list[currentItemIdx] = newItem;
 
             this.setState({
                 list: list,
@@ -100,16 +112,58 @@ class Timer extends Component {
         }
     }
 
-    handleTitleSaveButton = (id) => {
+    titleSaveButton = (id) => {
         return () => {
             const currentItem = this.state.list.find(listItem => listItem.id === id);
+            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
             let list = [...this.state.list];
             currentItem.isEditMode = false;
-            list[currentItem] = currentItem;
+            let newItem = {
+                ...currentItem
+            }
+            list[currentItemIdx] = newItem;
 
             this.setState({
                 list: list,
             })
+        }
+    }
+
+    handleOnChangeDescription = ({ target: { value } }) => this.setState({
+        description: value,
+    })
+
+    detailsButton = (id) => {
+        return () => {
+            const currentItem = this.state.list.find(listItem => listItem.id === id);
+            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
+            const shownItem = this.state.list.find(listItem => listItem.isDetailsShown);
+
+            if (shownItem !== undefined && shownItem !== currentItem) {
+                shownItem.isDetailsShown = false;
+            }
+
+            if (!currentItem.isDetailsShown) {
+                let list = [...this.state.list];
+                currentItem.isDetailsShown = true;
+                let newItem = {
+                    ...currentItem
+                }
+                list[currentItemIdx] = newItem;
+                this.setState({
+                    list: list,
+                })
+            } else {
+                let list = [...this.state.list];
+                currentItem.isDetailsShown = false;
+                let newItem = {
+                    ...currentItem
+                }
+                list[currentItemIdx] = newItem;
+                this.setState({
+                    list: list,
+                })
+            }
         }
     }
 
@@ -117,20 +171,25 @@ class Timer extends Component {
         const list = this.state.list;
         return (
             <>
-
                 <div>{formatHours(this.state.seconds)}</div>
 
-                <div>
+                <div id='formsContainer'>
                     <form>
-                        <label htmlFor='input-for-title'>Title</label>
+                        <label>Title</label>
                         <input type={'text'} value={this.state.title} onChange={this.inputChangeHandler}></input>
+                    </form>
+                    <form>
+                        <label>Description</label>
+                        <textarea value={this.state.description} onChange={this.handleOnChangeDescription}></textarea>
                     </form>
                 </div>
 
-                <button onClick={this.startAction}>Start</button>
-                <button onClick={this.stopAction}>Stop</button>
-                <button onClick={this.pauseAction}>Pause</button>
-                <button onClick={this.handleSaveClick}>Save</button>
+                <div id='buttonsContainer'>
+                    <button onClick={this.startAction}>Start</button>
+                    <button onClick={this.stopAction}>Stop</button>
+                    <button onClick={this.pauseAction}>Pause</button>
+                    <button onClick={this.saveButton}>Save</button>
+                </div>
 
                 <ul>
                     {
@@ -141,23 +200,38 @@ class Timer extends Component {
                                         <input
                                             type='text'
                                             defaultValue={listItem.title}
-                                            onChange={this.handleOnchage(listItem.id)}
+                                            onChange={this.changeTitleInEditState(listItem.id)}
                                         />
                                     )
                                         : listItem.title}
-                                        {
-                                            listItem.title.length > 0 && ' - '
-                                        }
-                                    {formatHours(listItem.time)}
                                 {
-                                    listItem.isEditMode ? <button type='submit' onClick={this.handleTitleSaveButton(listItem.id)}>Save</button>
-                                        : <button type="button" onClick={this.handleToggleEdit(listItem.id)}>Edit</button>
+                                    listItem.title.length > 0 && ' - '
                                 }
-                                <button type="button" onClick={this.removeList(listItem.id)}>Remove</button>
+                                {formatHours(listItem.time)}
+                                {
+                                    listItem.isEditMode ? <button type='submit' onClick={this.titleSaveButton(listItem.id)}>Save</button>
+                                        : <button type="button" onClick={this.editButton(listItem.id)}>Edit</button>
+                                }
+                                {
+                                    <button onClick={this.detailsButton(listItem.id)}>Details</button>
+                                }
+                                <button type="button" onClick={this.removeItemFromList(listItem.id)}>Remove</button>
 
                             </li>)
                     }
                 </ul>
+
+                {
+                    list.map((listItem, index) =>
+                        listItem.isDetailsShown ?
+                            <div key={index} id='detailsContainer'>
+                                <hr />
+                                <p>{'Title: '}{listItem.title}</p>
+                                <p>{'Description: '}{listItem.description}</p>
+                                <p>{'Time: '}{formatHours(listItem.time)}</p>
+                            </div>
+                            : null)
+                }
             </>
         );
     }
