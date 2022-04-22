@@ -8,8 +8,18 @@ class Timer extends Component {
         listId: 0,
         list: [],
         title: '',
-        description : ''
+        description: ''
     };
+
+    componentDidMount() {
+        const list = JSON.parse(localStorage.getItem('list'));
+        this.setState({ list })   
+    }
+
+    componentDidUpdate() {
+        const items = JSON.stringify(this.state.list)
+        localStorage.setItem('list', items)
+    }
 
     startAction = () => {
         const newIntervalId = setInterval(() => {
@@ -65,12 +75,13 @@ class Timer extends Component {
             description: '',
             listId: this.state.listId + 1,
         });
+
     };
 
     removeItemFromList = (id) => {
         return () => {
             const newList = this.state.list.filter((listItem) => listItem.id !== id);
-
+            localStorage.setItem('list', JSON.stringify(newList));
             this.setState({
                 list: newList,
             })
@@ -125,7 +136,9 @@ class Timer extends Component {
 
             this.setState({
                 list: list,
-            })
+            });
+
+            localStorage.setItem('list', JSON.stringify(newItem))
         }
     }
 
@@ -169,6 +182,7 @@ class Timer extends Component {
 
     render() {
         const list = this.state.list;
+
         return (
             <>
                 <div>{formatHours(this.state.seconds)}</div>
@@ -223,14 +237,14 @@ class Timer extends Component {
 
                 {
                     list.map((listItem, index) =>
-                        listItem.isDetailsShown ?
-                            <div key={index} id='detailsContainer'>
-                                <hr />
-                                <p>{'Title: '}{listItem.title}</p>
-                                <p>{'Description: '}{listItem.description}</p>
-                                <p>{'Time: '}{formatHours(listItem.time)}</p>
-                            </div>
-                            : null)
+                        listItem.isDetailsShown &&
+                        <div key={index} id='detailsContainer'>
+                            <hr />
+                            <p>{'Title: '}{listItem.title}</p>
+                            <p>{'Description: '}{listItem.description}</p>
+                            <p>{'Time: '}{formatHours(listItem.time)}</p>
+                        </div>
+                    )
                 }
             </>
         );
