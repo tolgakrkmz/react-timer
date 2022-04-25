@@ -5,10 +5,10 @@ class Timer extends Component {
     state = {
         seconds: 1,
         intervalId: 0,
-        listId: 0,
-        list: [],
         title: '',
         description: '',
+        listId: 0,
+        list: [],
     };
 
     componentDidMount() {
@@ -21,19 +21,17 @@ class Timer extends Component {
         localStorage.setItem('list', items)
     }
 
-    startAction = () => {
-        const newIntervalId = setInterval(() => {
+    handleStartButtonClick = () => {
+        const intervalId = setInterval(() => {
             this.setState({
                 seconds: this.state.seconds + 1,
             });
         }, 1000);
 
-        this.setState({
-            intervalId: newIntervalId,
-        });
+        this.setState({ intervalId });
     }
 
-    stopAction = () => {
+    handleStopButtonClick = () => {
         if (this.state.intervalId) {
             clearInterval(this.state.intervalId);
             this.setState({
@@ -43,22 +41,21 @@ class Timer extends Component {
         }
     }
 
-    pauseAction = () => {
+    handlePauseButtonClick = () => {
         if (this.state.intervalId) {
             clearInterval(this.state.intervalId);
-            this.setState({
-                seconds: this.state.seconds,
-            })
         }
     }
 
-    inputChangeHandler = ({ target: { value } }) => this.setState({
-        title: value,
-    })
+    handleTitleInputChange = ({ target: { value } }) => {
+        this.setState({ title: value })
+    }
 
-    saveButton = (e) => {
-        e.preventDefault();
+    handleDescriptionInputChange = ({ target: { value } }) => {
+        this.setState({ description: value });
+    }
 
+    handleSaveButtonClick = () => {
         const listItem = {
             id: this.state.listId,
             title: this.state.title,
@@ -66,7 +63,7 @@ class Timer extends Component {
             isEditMode: false,
             isDetailsShown: false,
             description: this.state.description,
-        }
+        };
 
         this.setState({
             list: [...this.state.list, listItem],
@@ -74,178 +71,123 @@ class Timer extends Component {
             description: '',
             listId: this.state.listId + 1,
         });
-
-        localStorage.setItem('list', JSON.stringify(this.state.list))
     };
 
-    removeItemFromList = (id) => {
+    handleRemoveItemButtonClick = (id) => {
         return () => {
-            const newList = this.state.list.filter((listItem) => listItem.id !== id);
-            localStorage.setItem('list', JSON.stringify(newList));
-            this.setState({
-                list: newList,
-            })
+            const list = this.state.list.filter((listItem) => listItem.id !== id);
+
+            this.setState({ list });
         };
     }
 
-    editButton = (id) => {
+    handleEditItemButtonClick = (id) => {
         return () => {
-            const currentItem = this.state.list.find(listItem => listItem.id === id);
             const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            let list = [...this.state.list];
-            currentItem.isEditMode = true;
-            let newItem = {
-                ...currentItem
-            }
-            list[currentItemIdx] = newItem;
+            const list = [...this.state.list];
+            list[currentItemIdx] = { ...list[currentItemIdx] };
+            list[currentItemIdx].isEditMode = true;
 
-            this.setState({
-                list: list,
-            })
-        }
+            this.setState({ list });
+        };
     }
 
-    changeTitleInEditState = (id) => {
-        return (e) => {
-            const currentItem = this.state.list.find(listItem => listItem.id === id);
+    handleEditItemTitleInputChange = (id) => {
+        return ({ target: { value } }) => {
             const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            let list = [...this.state.list];
-            currentItem.title = e.target.value;
-            let newItem = {
-                ...currentItem
-            }
-            list[currentItemIdx] = newItem;
+            const list = [...this.state.list];
+            list[currentItemIdx] = { ...list[currentItemIdx] };
+            list[currentItemIdx].title = value;
 
-            this.setState({
-                list: list,
-            })
-
-        }
+            this.setState({ list });
+        };
     }
 
-    titleSaveButton = (id) => {
+    handleSaveItemButtonClick = (id) => {
         return () => {
-            const currentItem = this.state.list.find(listItem => listItem.id === id);
             const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            let list = [...this.state.list];
-            currentItem.isEditMode = false;
-            let newItem = {
-                ...currentItem
-            }
-            list[currentItemIdx] = newItem;
+            const list = [...this.state.list];
+            list[currentItemIdx] = { ...list[currentItemIdx] };
+            list[currentItemIdx].isEditMode = false;
 
-            this.setState({
-                list: list,
-            });
-
-            localStorage.setItem('list', JSON.stringify(newItem))
-        }
+            this.setState({ list });
+        };
     }
 
-    handleOnChangeDescription = ({ target: { value } }) => this.setState({
-        description: value,
-    })
-
-    detailsButton = (id) => {
+    handleItemDetailsButtonClick = (id) => {
         return () => {
-            const currentItem = this.state.list.find(listItem => listItem.id === id);
-            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            const shownItem = this.state.list.find(listItem => listItem.isDetailsShown);
+            const list = this.state.list.map(listItem => ({
+                ...listItem,
+                isDetailsShown: false,
+            }));
+            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
+            list[currentItemIdx].isDetailsShown = true;
 
-            if (shownItem !== undefined && shownItem !== currentItem) {
-                shownItem.isDetailsShown = false;
-            }
-
-            if (!currentItem.isDetailsShown) {
-                let list = [...this.state.list];
-                currentItem.isDetailsShown = true;
-                let newItem = {
-                    ...currentItem
-                }
-                list[currentItemIdx] = newItem;
-                this.setState({
-                    list: list,
-                })
-            } else {
-                let list = [...this.state.list];
-                currentItem.isDetailsShown = false;
-                let newItem = {
-                    ...currentItem
-                }
-                list[currentItemIdx] = newItem;
-                this.setState({
-                    list: list,
-                })
-            }
-        }
+            this.setState({ list });
+        };
     }
 
     render() {
         const list = this.state.list;
+        const selectedItem = this.state.list.find(listItem => listItem.isDetailsShown);
 
         return (
             <>
-                <div>{formatHours(this.state.seconds)}</div>
+                <span>{formatHours(this.state.seconds)}</span>
+                <button type="button" onClick={this.handleStartButtonClick}>Start</button>
+                <button type="button" onClick={this.handleStopButtonClick}>Stop</button>
+                <button type="button" onClick={this.handlePauseButtonClick}>Pause</button>
 
-                <div id='formsContainer'>
-                    <form>
-                        <label>Title</label>
-                        <input type={'text'} value={this.state.title} onChange={this.inputChangeHandler}></input>
-                    </form>
-                    <form>
-                        <label>Description</label>
-                        <textarea value={this.state.description} onChange={this.handleOnChangeDescription}></textarea>
-                    </form>
+                <div>
+                    <label>Title</label>
+                    <input type="text" value={this.state.title} onChange={this.handleTitleInputChange} />
+                </div>
+                <div>
+                    <label>Description</label>
+                    <textarea value={this.state.description} onChange={this.handleDescriptionInputChange} />
                 </div>
 
-                <div id='buttonsContainer'>
-                    <button onClick={this.startAction}>Start</button>
-                    <button onClick={this.stopAction}>Stop</button>
-                    <button onClick={this.pauseAction}>Pause</button>
-                    <button onClick={this.saveButton}>Save</button>
-                </div>
+                <button onClick={this.handleSaveButtonClick}>Save</button>
 
                 <ul>
-                    {
-                        list.map((listItem, index) =>
-                            <li key={index}>
-                                {
-                                    listItem.isEditMode ? (
-                                        <input
-                                            type='text'
-                                            defaultValue={listItem.title}
-                                            onChange={this.changeTitleInEditState(listItem.id)}
-                                        />
-                                    )
-                                        : listItem.title}
-                                {
-                                    listItem.title.length > 0 && ' - '
-                                }
-                                {formatHours(listItem.time)}
-                                {
-                                    listItem.isEditMode ? <button type='submit' onClick={this.titleSaveButton(listItem.id)}>Save</button>
-                                        : <button type="button" onClick={this.editButton(listItem.id)}>Edit</button>
-                                }
-                                {
-                                    <button onClick={this.detailsButton(listItem.id)}>Details</button>
-                                }
-                                <button type="button" onClick={this.removeItemFromList(listItem.id)}>Remove</button>
+                    {list.map((listItem, index) =>
+                        <li key={index}>
+                            {listItem.isEditMode && (
+                                <input
+                                    type="text"
+                                    value={listItem.title}
+                                    onChange={this.handleEditItemTitleInputChange(listItem.id)}
+                                />
+                            )}
 
-                            </li>)
-                    }
+                            {!listItem.isEditMode && listItem.title}
+
+                            {(listItem.title.length > 0 || listItem.isEditMode) && ' - '}
+
+                            {formatHours(listItem.time)}
+
+                            {listItem.isEditMode && (
+                                <button type="button" onClick={this.handleSaveItemButtonClick(listItem.id)}>Save</button>
+                            )}
+
+                            {!listItem.isEditMode && (
+                                <button type="button" onClick={this.handleEditItemButtonClick(listItem.id)}>Edit</button>
+                            )}
+
+                            <button type="button" onClick={this.handleItemDetailsButtonClick(listItem.id)}>Details</button>
+                            <button type="button" onClick={this.handleRemoveItemButtonClick(listItem.id)}>Remove</button>
+                        </li>
+                    )}
                 </ul>
 
-                {
-                    list.map((listItem, index) =>
-                        listItem.isDetailsShown &&
-                        <div key={index} id='detailsContainer'>
-                            <hr />
-                            <p>{'Title: '}{listItem.title}</p>
-                            <p>{'Description: '}{listItem.description}</p>
-                            <p>{'Time: '}{formatHours(listItem.time)}</p>
-                        </div>
-                    )
-                }
+                {selectedItem && (
+                    <>
+                        <hr />
+                        <p>Title: {listItem.title}</p>
+                        <p>Description: {listItem.description}</p>
+                        <p>Time: {formatHours(listItem.time)}</p>
+                    </>
+                )}
             </>
         );
     }
