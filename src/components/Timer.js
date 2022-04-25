@@ -8,12 +8,12 @@ class Timer extends Component {
         listId: 0,
         list: [],
         title: '',
-        description: ''
+        description: '',
     };
 
     componentDidMount() {
         const list = JSON.parse(localStorage.getItem('list'));
-        this.setState({ list })   
+        this.setState({ list })
     }
 
     componentDidUpdate() {
@@ -41,7 +41,6 @@ class Timer extends Component {
                 seconds: 1,
             });
         }
-
     }
 
     pauseAction = () => {
@@ -76,6 +75,7 @@ class Timer extends Component {
             listId: this.state.listId + 1,
         });
 
+        localStorage.setItem('list', JSON.stringify(this.state.list))
     };
 
     removeItemFromList = (id) => {
