@@ -116,12 +116,13 @@ class Timer extends Component {
 
     handleItemDetailsButtonClick = (id) => {
         return () => {
+            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
+            const currentItemIsDetailsShown = this.state.list[currentItemIdx].isDetailsShown;
             const list = this.state.list.map(listItem => ({
                 ...listItem,
                 isDetailsShown: false,
             }));
-            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            list[currentItemIdx].isDetailsShown = true;
+            list[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
 
             this.setState({ list });
         };
@@ -183,9 +184,9 @@ class Timer extends Component {
                 {selectedItem && (
                     <>
                         <hr />
-                        <p>Title: {listItem.title}</p>
-                        <p>Description: {listItem.description}</p>
-                        <p>Time: {formatHours(listItem.time)}</p>
+                        <p>Title: {selectedItem.title}</p>
+                        <p>Description: {selectedItem.description}</p>
+                        <p>Time: {formatHours(selectedItem.time)}</p>
                     </>
                 )}
             </>
