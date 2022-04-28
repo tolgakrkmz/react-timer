@@ -1,43 +1,32 @@
-import React, { Component } from 'react'
+import React, { useRef } from 'react'
 import { formatHours } from '../utils/format';
 
-class Timer extends Component {
-    state = {
-        intervalId: 0,
-    };
+const Timer = (props) => {
+    const intervalId = useRef(0)
 
-    handleStartButtonClick = () => {
-        const intervalId = setInterval(() => {
-            this.props.onSecondsChange(this.props.seconds + 1);
+    function handleStartButtonClick() {
+        clearInterval(intervalId.current);
+        intervalId.current = setInterval(() => {
+            props.incrementSeconds();
         }, 1000);
-
-        this.setState({ intervalId });
     }
 
-    handleStopButtonClick = () => {
-        if (this.state.intervalId) {
-            clearInterval(this.state.intervalId);
-            this.setState({ intervalId: 0 });
-            this.props.onSecondsChange(1);
-        }
+    function handleStopButtonClick() {
+        props.stopSeconds();
+        clearInterval(intervalId.current);
     }
 
-    handlePauseButtonClick = () => {
-        if (this.state.intervalId) {
-            clearInterval(this.state.intervalId);
-        }
+    function handlePauseButtonClick() {
+        clearInterval(intervalId.current)
     }
-
-    render() {
-        return (
-            <>
-                <span>{formatHours(this.props.seconds)}</span>
-                <button type="button" onClick={this.handleStartButtonClick}>Start</button>
-                <button type="button" onClick={this.handleStopButtonClick}>Stop</button>
-                <button type="button" onClick={this.handlePauseButtonClick}>Pause</button>
-            </>
-        );
-    }
+    return (
+        <>
+            <span>{formatHours(props.seconds)}</span>
+            <button type="button" onClick={handleStartButtonClick}>Start</button>
+            <button type="button" onClick={handleStopButtonClick}>Stop</button>
+            <button type="button" onClick={handlePauseButtonClick}>Pause</button>
+        </>
+    )
 }
 
 export default Timer;

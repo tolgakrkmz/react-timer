@@ -1,174 +1,159 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from 'react'
 import { formatHours } from '../utils/format';
 
-class List extends Component {
-    state = {
-        title: '',
-        description: '',
-        listId: 0,
-        list: [],
-    };
 
-    componentDidMount() {
-        const list = localStorage.getItem('list');
+function List(props) {
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [listId, setListId] = useState(0);
+    const [list, setList] = useState([]);
 
+    useEffect(() => {
+        const list = localStorage.getItem('list')
         if (list) {
-            this.setState({ list: JSON.parse(list) })
+            setList(JSON.parse(list));
         }
 
         const listId = localStorage.getItem('listId');
-
         if (listId !== null) {
-            this.setState({ listId: Number(listId) });
+            setListId(Number(listId));
         }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem('list', JSON.stringify(list));
+        localStorage.setItem('listId', JSON.stringify(listId));
+    }, [list, listId]);
+
+    const handleTitleInputChange = ({ target: { value } }) => {
+        setTitle(value);
+    }
+    const handleDescriptionInputChange = ({ target: { value } }) => {
+        setDescription(value);
     }
 
-    componentDidUpdate() {
-        const items = JSON.stringify(this.state.list);
-        localStorage.setItem('list', items);
-        localStorage.setItem('listId', this.state.listId);
-    }
-
-    handleTitleInputChange = ({ target: { value } }) => {
-        this.setState({ title: value })
-    }
-
-    handleDescriptionInputChange = ({ target: { value } }) => {
-        this.setState({ description: value });
-    }
-
-    handleSaveButtonClick = () => {
+    const handleSaveButtonClick = () => {
         const listItem = {
-            id: this.state.listId,
-            title: this.state.title,
-            time: this.props.seconds,
+            id: listId,
+            title: title,
+            time: props.seconds,
             isEditMode: false,
             isDetailsShown: false,
-            description: this.state.description,
+            description: description,
         };
 
-        this.setState({
-            list: [...this.state.list, listItem],
-            title: '',
-            description: '',
-            listId: this.state.listId + 1,
-        });
+        setList(array => [...array, listItem]);
+        setTitle('');
+        setDescription('');
+        setListId(listId + 1);
     };
 
-    handleRemoveItemButtonClick = (id) => {
+    function handleEditItemButtonClick(id) {
         return () => {
-            const list = this.state.list.filter((listItem) => listItem.id !== id);
-
-            this.setState({ list });
-        };
-    }
-
-    handleEditItemButtonClick = (id) => {
-        return () => {
-            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            const list = [...this.state.list];
+            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
             list[currentItemIdx] = { ...list[currentItemIdx] };
             list[currentItemIdx].isEditMode = true;
-
-            this.setState({ list });
+            setList(list)
         };
     }
 
-    handleEditItemTitleInputChange = (id) => {
+    function handleEditItemTitleInputChange(id) {
         return ({ target: { value } }) => {
-            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            const list = [...this.state.list];
+            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
             list[currentItemIdx] = { ...list[currentItemIdx] };
             list[currentItemIdx].title = value;
 
-            this.setState({ list });
+            setList(list)
         };
     }
 
-    handleSaveItemButtonClick = (id) => {
+    function handleSaveItemButtonClick(id) {
         return () => {
-            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            const list = [...this.state.list];
+            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
             list[currentItemIdx] = { ...list[currentItemIdx] };
             list[currentItemIdx].isEditMode = false;
 
-            this.setState({ list });
+            setList(list);
         };
     }
 
-    handleItemDetailsButtonClick = (id) => {
+    function handleRemoveItemButtonClick(id) {
         return () => {
-            const currentItemIdx = this.state.list.findIndex(listItem => listItem.id === id);
-            const currentItemIsDetailsShown = this.state.list[currentItemIdx].isDetailsShown;
-            const list = this.state.list.map(listItem => ({
+            const item = list.filter((listItem) => listItem.id !== id);
+
+            setList(item);
+        };
+    }
+
+    function handleItemDetailsButtonClick(id) {
+        return () => {
+            const currentItemIdx = list.findIndex(listItem => listItem.id === id);
+            const currentItemIsDetailsShown = list[currentItemIdx].isDetailsShown;
+            const item = list.map(listItem => ({
                 ...listItem,
                 isDetailsShown: false,
             }));
-            list[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
+            item[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
 
-            this.setState({ list });
+            setList(item)
         };
     }
 
-    render() {
-        const list = this.state.list;
-        const selectedItem = this.state.list.find(listItem => listItem.isDetailsShown);
+    const selectedItem = list.find(listItem => listItem.isDetailsShown);
 
-        return (
-            <>
-                <div>
-                    <label>Title</label>
-                    <input type="text" value={this.state.title} onChange={this.handleTitleInputChange} />
-                </div>
-                <div>
-                    <label>Description</label>
-                    <textarea value={this.state.description} onChange={this.handleDescriptionInputChange} />
-                </div>
+    return (
+        <>
+            <div>
+                <label>Title</label>
+                <input type="text" value={title} onChange={handleTitleInputChange} />
+            </div>
+            <div>
+                <label>Description</label>
+                <textarea value={description} onChange={handleDescriptionInputChange} />
+            </div>
 
-                <button onClick={this.handleSaveButtonClick}>Save</button>
+            <button onClick={handleSaveButtonClick}>Save</button>
 
-                <ul>
-                    {list.map((listItem, index) =>
-                        <li key={index}>
-                            {listItem.isEditMode && (
-                                <input
-                                    type="text"
-                                    value={listItem.title}
-                                    onChange={this.handleEditItemTitleInputChange(listItem.id)}
-                                />
-                            )}
+            <ul>
+                {list.map((listItem, index) =>
+                    <li key={index}>
+                        {listItem.isEditMode && (
+                            <input
+                                type="text"
+                                value={listItem.title}
+                                onChange={handleEditItemTitleInputChange(listItem.id)}
+                            />
+                        )}
 
-                            {!listItem.isEditMode && listItem.title}
+                        {!listItem.isEditMode && listItem.title}
 
-                            {(listItem.title.length > 0 || listItem.isEditMode) && ' - '}
+                        {(listItem.title.length > 0 || listItem.isEditMode) && ' - '}
 
-                            {formatHours(listItem.time)}
+                        {formatHours(listItem.time)}
 
-                            {listItem.isEditMode && (
-                                <button type="button" onClick={this.handleSaveItemButtonClick(listItem.id)}>Save</button>
-                            )}
+                        {listItem.isEditMode && (
+                            <button type="button" onClick={handleSaveItemButtonClick(listItem.id)}>Save</button>
+                        )}
 
-                            {!listItem.isEditMode && (
-                                <button type="button" onClick={this.handleEditItemButtonClick(listItem.id)}>Edit</button>
-                            )}
+                        {!listItem.isEditMode && (
+                            <button type="button" onClick={handleEditItemButtonClick(listItem.id)}>Edit</button>
+                        )}
 
-                            <button type="button" onClick={this.handleItemDetailsButtonClick(listItem.id)}>Details</button>
-                            <button type="button" onClick={this.handleRemoveItemButtonClick(listItem.id)}>Remove</button>
-                        </li>
-                    )}
-                </ul>
-
-                {selectedItem && (
-                    <>
-                        <hr />
-                        <p>Title: {selectedItem.title}</p>
-                        <p>Description: {selectedItem.description}</p>
-                        <p>Time: {formatHours(selectedItem.time)}</p>
-                    </>
+                        <button type="button" onClick={handleItemDetailsButtonClick(listItem.id)}>Details</button>
+                        <button type="button" onClick={handleRemoveItemButtonClick(listItem.id)}>Remove</button>
+                    </li>
                 )}
-            </>
-        );
-    }
-}
+            </ul>
 
+            {selectedItem && (
+                <>
+                    <hr />
+                    <p>Title: {selectedItem.title}</p>
+                    <p>Description: {selectedItem.description}</p>
+                    <p>Time: {formatHours(selectedItem.time)}</p>
+                </>
+            )}
+        </>
+    )
+}
 export default List;
