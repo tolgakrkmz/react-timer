@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import List from './components/List';
-import Timer from './components/Timer'
-
+import Timer from './components/Timer';
 
 function App() {
   const [seconds, setSeconds] = useState(1);
@@ -10,16 +9,16 @@ function App() {
     setSeconds((prevSeconds) => prevSeconds + 1);
   }
 
-  function handleStopTimer() {
+  function handleResetSeconds() {
     setSeconds(1);
   }
 
   return (
     <>
-      <Timer seconds={seconds} incrementSeconds={handleIncrementSeconds} stopSeconds={handleStopTimer} />
+      <Timer seconds={seconds} incrementSeconds={handleIncrementSeconds} resetSeconds={handleResetSeconds} />
       <List seconds={seconds} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,38 +1,41 @@
 import React, { useEffect, useState } from 'react'
 import { formatHours } from '../utils/format';
 
-
 function List(props) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [listId, setListId] = useState(0);
     const [list, setList] = useState([]);
+    const selectedItem = list.find(listItem => listItem.isDetailsShown);
 
-    useEffect(() => {
-        const list = localStorage.getItem('list')
+    useEffect(function componentDidMount() {
+        const list = localStorage.getItem('list');
+
         if (list) {
             setList(JSON.parse(list));
         }
 
         const listId = localStorage.getItem('listId');
+
         if (listId !== null) {
             setListId(Number(listId));
         }
     }, [])
 
-    useEffect(() => {
+    useEffect(function handleLocalStorageSync() {
         localStorage.setItem('list', JSON.stringify(list));
         localStorage.setItem('listId', JSON.stringify(listId));
     }, [list, listId]);
 
-    const handleTitleInputChange = ({ target: { value } }) => {
+    function handleTitleInputChange({ target: { value } }) {
         setTitle(value);
     }
-    const handleDescriptionInputChange = ({ target: { value } }) => {
+
+    function handleDescriptionInputChange({ target: { value } }) {
         setDescription(value);
     }
 
-    const handleSaveButtonClick = () => {
+    function handleSaveButtonClick() {
         const listItem = {
             id: listId,
             title: title,
@@ -42,7 +45,7 @@ function List(props) {
             description: description,
         };
 
-        setList(array => [...array, listItem]);
+        setList(previousList => [...previousList, listItem]);
         setTitle('');
         setDescription('');
         setListId(listId + 1);
@@ -51,41 +54,41 @@ function List(props) {
     function handleEditItemButtonClick(id) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            const listShallowed = [...list];
-            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
-            listShallowed[currentItemIdx].isEditMode = true;
+            const newList = [...list];
+            newList[currentItemIdx] = { ...newList[currentItemIdx] };
+            newList[currentItemIdx].isEditMode = true;
 
-            setList(listShallowed)
+            setList(newList);
         };
     }
 
     function handleEditItemTitleInputChange(id) {
         return ({ target: { value } }) => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            const listShallowed = [...list]
-            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
-            listShallowed[currentItemIdx].title = value;
+            const newList = [...list]
+            newList[currentItemIdx] = { ...newList[currentItemIdx] };
+            newList[currentItemIdx].title = value;
 
-            setList(listShallowed)
+            setList(newList);
         };
     }
 
     function handleSaveItemButtonClick(id) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            const listShallowed = [...list];
-            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
-            listShallowed[currentItemIdx].isEditMode = false;
+            const newList = [...list];
+            newList[currentItemIdx] = { ...newList[currentItemIdx] };
+            newList[currentItemIdx].isEditMode = false;
 
-            setList(listShallowed);
+            setList(newList);
         };
     }
 
     function handleRemoveItemButtonClick(id) {
         return () => {
-            const item = list.filter((listItem) => listItem.id !== id);
+            const newList = list.filter((listItem) => listItem.id !== id);
 
-            setList(item);
+            setList(newList);
         };
     }
 
@@ -93,17 +96,15 @@ function List(props) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
             const currentItemIsDetailsShown = list[currentItemIdx].isDetailsShown;
-            const listShallowed = list.map(listItem => ({
+            const newList = list.map(listItem => ({
                 ...listItem,
                 isDetailsShown: false,
             }));
-            listShallowed[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
+            newList[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
 
-            setList(listShallowed)
+            setList(newList);
         };
     }
-
-    const selectedItem = list.find(listItem => listItem.isDetailsShown);
 
     return (
         <>
@@ -158,6 +159,7 @@ function List(props) {
                 </>
             )}
         </>
-    )
+    );
 }
+
 export default List;

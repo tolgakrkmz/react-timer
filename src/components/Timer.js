@@ -1,8 +1,8 @@
 import React, { useRef } from 'react'
 import { formatHours } from '../utils/format';
 
-const Timer = (props) => {
-    const intervalId = useRef(0)
+function Timer(props) {
+    const intervalId = useRef(0);
 
     function handleStartButtonClick() {
         clearInterval(intervalId.current);
@@ -12,13 +12,14 @@ const Timer = (props) => {
     }
 
     function handleStopButtonClick() {
-        props.stopSeconds();
+        props.resetSeconds();
         clearInterval(intervalId.current);
     }
 
     function handlePauseButtonClick() {
-        clearInterval(intervalId.current)
+        clearInterval(intervalId.current);
     }
+
     return (
         <>
             <span>{formatHours(props.seconds)}</span>
