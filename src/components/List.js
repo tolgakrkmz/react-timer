@@ -51,29 +51,33 @@ function List(props) {
     function handleEditItemButtonClick(id) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            list[currentItemIdx] = { ...list[currentItemIdx] };
-            list[currentItemIdx].isEditMode = true;
-            setList(list)
+            const listShallowed = [...list];
+            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
+            listShallowed[currentItemIdx].isEditMode = true;
+
+            setList(listShallowed)
         };
     }
 
     function handleEditItemTitleInputChange(id) {
         return ({ target: { value } }) => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            list[currentItemIdx] = { ...list[currentItemIdx] };
-            list[currentItemIdx].title = value;
+            const listShallowed = [...list]
+            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
+            listShallowed[currentItemIdx].title = value;
 
-            setList(list)
+            setList(listShallowed)
         };
     }
 
     function handleSaveItemButtonClick(id) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
-            list[currentItemIdx] = { ...list[currentItemIdx] };
-            list[currentItemIdx].isEditMode = false;
+            const listShallowed = [...list];
+            listShallowed[currentItemIdx] = { ...listShallowed[currentItemIdx] };
+            listShallowed[currentItemIdx].isEditMode = false;
 
-            setList(list);
+            setList(listShallowed);
         };
     }
 
@@ -89,13 +93,13 @@ function List(props) {
         return () => {
             const currentItemIdx = list.findIndex(listItem => listItem.id === id);
             const currentItemIsDetailsShown = list[currentItemIdx].isDetailsShown;
-            const item = list.map(listItem => ({
+            const listShallowed = list.map(listItem => ({
                 ...listItem,
                 isDetailsShown: false,
             }));
-            item[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
+            listShallowed[currentItemIdx].isDetailsShown = !currentItemIsDetailsShown;
 
-            setList(item)
+            setList(listShallowed)
         };
     }
 
